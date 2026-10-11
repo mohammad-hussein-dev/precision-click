@@ -9,7 +9,7 @@ description = "High-precision automated mouse clicking tool with millisecond sch
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-  { name="Mohammad Hussein Ghaffouri", email="your-email@example.com" }
+  { name="Mohammad Hussein Ghafoori", email="your-email@example.com" }
 ]
 keywords = ["automation", "mouse", "clicker", "windows", "python"]
 classifiers = [

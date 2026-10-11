@@ -149,7 +149,7 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information
 
 <div align="center">
 
-**Developed by Mohammad Hussein Ghaffouri**  
+**Developed by Mohammad Hussein Ghafoori**  
 *Senior Software Architect | DevSecOps Engineer*
 
 [🌐 Portfolio](https://mohammad-hussein-dev.github.io/mohammad-hussein-dev/) • [💼 LinkedIn](https://www.linkedin.com/in/mohammad-hussein-dev/) • [🐙 GitHub](https://github.com/mohammad-hussein-dev) • [🦊 GitLab](https://gitlab.com/mohammad-hussein-dev) • [📧 Email](mailto:mohammad.hussein.dev.1@gmail.com)
