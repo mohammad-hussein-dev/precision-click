@@ -31,7 +31,7 @@ References:
 import datetime
 import time
 from threading import Event
-from typing import Callable, Optional
+from typing import Callable
 
 from src.core.mouse import MouseDriver
 

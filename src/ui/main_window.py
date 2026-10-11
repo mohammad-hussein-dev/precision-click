@@ -24,10 +24,10 @@ Usage:
     root.mainloop()
 """
 
+import datetime
+import threading
 import tkinter as tk
 from tkinter import ttk
-import threading
-import datetime
 from typing import Optional
 
 from src.core.engine import PrecisionEngine

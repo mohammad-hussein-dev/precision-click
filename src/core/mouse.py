@@ -27,8 +27,8 @@ See Also:
 - https://pypi.org/project/pynput/
 """
 
-from typing import Tuple
 import time
+from typing import Tuple
 
 from pynput.mouse import Button, Controller
 

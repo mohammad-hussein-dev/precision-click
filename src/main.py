@@ -8,8 +8,8 @@ Initializes the Tkinter root window, centers it on the screen,
 and starts the main event loop.
 """
 
-import sys
 import os
+import sys
 import tkinter as tk
 
 # Ensure project root is in path for imports
