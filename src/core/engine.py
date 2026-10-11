@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # kate: syntax python; hl 1; space-indent on; indent-width 4; tab-width 4;
 
 """High-precision timing engine for scheduled automation tasks.
@@ -30,8 +29,8 @@ References:
 
 import datetime
 import time
+from collections.abc import Callable
 from threading import Event
-from typing import Callable
 
 from src.core.mouse import MouseDriver
 
@@ -166,8 +165,7 @@ class PrecisionEngine:
             ) + datetime.timedelta(milliseconds=ms)
 
             # Handle past times by starting immediately
-            if datetime.datetime.now() > target_dt:
-                target_dt = datetime.datetime.now()
+            target_dt = max(target_dt, datetime.datetime.now())
 
             self._is_active = True
             success = self._wait_until_precision(target_dt)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # kate: syntax python; hl 1; space-indent on; indent-width 4; tab-width 4;
 
 """Tkinter-based Graphical User Interface for PrecisionClick.
@@ -28,7 +27,6 @@ import datetime
 import threading
 import tkinter as tk
 from tkinter import ttk
-from typing import Optional
 
 from src.core.engine import PrecisionEngine
 
@@ -50,7 +48,7 @@ class MainWindow:
         """
         self.root = root
         self.engine = PrecisionEngine()
-        self.worker_thread: Optional[threading.Thread] = None
+        self.worker_thread: threading.Thread | None = None
 
         self._setup_ui()
         self._bind_hotkeys()

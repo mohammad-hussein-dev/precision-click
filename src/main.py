@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # kate: syntax python; hl 1; space-indent on; indent-width 4; tab-width 4;
 
 """Application entry point for PrecisionClick.
@@ -37,7 +36,7 @@ def main() -> None:
     root = tk.Tk()
 
     # Initialize UI Controller
-    app = MainWindow(root)
+    MainWindow(root)
 
     # Center window visually
     center_window(root)

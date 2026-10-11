@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # kate: syntax python; hl 1; space-indent on; indent-width 4; tab-width 4;
 
 """Mouse interaction module providing low-level control via pynput.
@@ -28,7 +27,6 @@ See Also:
 """
 
 import time
-from typing import Tuple
 
 from pynput.mouse import Button, Controller
 
@@ -71,7 +69,7 @@ class MouseDriver:
 
         self._controller.release(Button.left)
 
-    def get_position(self) -> Tuple[int, int]:
+    def get_position(self) -> tuple[int, int]:
         """Retrieves the current cursor position.
 
         Returns:
