@@ -1,0 +1,22 @@
+name: Build Release Executable
+
+on:
+  push:
+    tags:
+      - 'v*' 
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pynput pyinstaller
+      - run: pyinstaller --onefile --windowed --name PrecisionClick src/main.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PrecisionClick-Windows
+          path: dist/PrecisionClick.exe
