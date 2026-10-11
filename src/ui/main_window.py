@@ -252,9 +252,7 @@ class MainWindow:
 
         except ValueError as ve:
             self._log_info(f"Input Error: {ve}")
-        except (
-            Exception
-        ) as e:  # noqa: BLE001 - Catch-all for UI stability; logged explicitly
+        except Exception as e:  # noqa: BLE001 - Intentional catch-all for UI stability
             self._log_info(f"Critical Unexpected Error: {e}")
 
     def _stop_process(self) -> None:
