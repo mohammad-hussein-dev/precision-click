@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # kate: syntax python; hl 1; space-indent on; indent-width 4; tab-width 4;
 
 """Mouse interaction module providing low-level control via pynput.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # kate: syntax python; hl 1; space-indent on; indent-width 4; tab-width 4;
 
 """Tkinter-based Graphical User Interface for PrecisionClick.
@@ -253,8 +252,10 @@ class MainWindow:
 
         except ValueError as ve:
             self._log_info(f"Input Error: {ve}")
-        except Exception as e:
-            self._log_info(f"Unexpected Error: {e}")
+        except (
+            Exception
+        ) as e:  # noqa: BLE001 - Catch-all for UI stability; logged explicitly
+            self._log_info(f"Critical Unexpected Error: {e}")
 
     def _stop_process(self) -> None:
         """Halts the running sequence and resets UI controls."""
