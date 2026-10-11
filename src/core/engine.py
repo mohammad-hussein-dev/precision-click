@@ -17,7 +17,7 @@ Design Philosophy:
 Usage:
 ------
     from src.core.engine import PrecisionEngine
-    
+
     engine = PrecisionEngine()
     # Execute sequence in background thread
     engine.execute_sequence(...)
@@ -124,7 +124,7 @@ class PrecisionEngine:
         interval_ms: float,
         x: int,
         y: int,
-        on_click_callback: Callable[[int, datetime.datetime], None]
+        on_click_callback: Callable[[int, datetime.datetime], None],
     ) -> None:
         """Executes the full automated clicking routine.
 
@@ -151,49 +151,48 @@ class PrecisionEngine:
                 raise ValueError("Interval cannot be negative.")
 
             today = datetime.date.today()
-            parts = start_time_str.strip().split(':')
-            
+            parts = start_time_str.strip().split(":")
+
             if len(parts) != 3:
                 raise ValueError("Time format must be HH:MM:SS.mmm")
 
             h, m = int(parts[0]), int(parts[1])
-            s_parts = parts[2].split('.')
+            s_parts = parts[2].split(".")
             s = int(s_parts[0])
             ms = int(s_parts[1][:3]) if len(s_parts) > 1 else 0
-            
+
             target_dt = datetime.datetime.combine(
-                today, 
-                datetime.time(h, m, s)
+                today, datetime.time(h, m, s)
             ) + datetime.timedelta(milliseconds=ms)
-            
+
             # Handle past times by starting immediately
             if datetime.datetime.now() > target_dt:
                 target_dt = datetime.datetime.now()
 
             self._is_active = True
             success = self._wait_until_precision(target_dt)
-            
+
             if not success:
                 return  # Interrupted during wait phase
 
             for i in range(total_clicks):
                 if self._stop_event.is_set():
                     break
-                
+
                 # Handle pause state within loop
                 while self._pause_event.is_set() and not self._stop_event.is_set():
                     time.sleep(0.1)
-                
+
                 if self._stop_event.is_set():
                     break
 
                 # Execute Action
                 self._mouse_driver.move_to(x, y)
                 self._mouse_driver.click_left()
-                
+
                 # Notify Observer (UI/Logger)
                 on_click_callback(i + 1, datetime.datetime.now())
-                
+
                 # Interval Wait (skip after last click)
                 if i < total_clicks - 1:
                     time.sleep(interval_ms / 1000.0)

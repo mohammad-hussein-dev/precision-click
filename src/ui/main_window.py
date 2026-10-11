@@ -18,7 +18,7 @@ Usage:
 ------
     import tkinter as tk
     from src.ui.main_window import MainWindow
-    
+
     root = tk.Tk()
     app = MainWindow(root)
     root.mainloop()
@@ -51,7 +51,7 @@ class MainWindow:
         self.root = root
         self.engine = PrecisionEngine()
         self.worker_thread: Optional[threading.Thread] = None
-        
+
         self._setup_ui()
         self._bind_hotkeys()
         self._log_info("System initialized. Ready for configuration.")
@@ -66,66 +66,57 @@ class MainWindow:
         # --- Header Section ---
         header_frame = ttk.Frame(self.root, padding=(10, 5))
         header_frame.pack(fill="x")
-        
+
         ttk.Label(
-            header_frame, 
-            text="PrecisionClick", 
-            font=("Segoe UI", 16, "bold")
+            header_frame, text="PrecisionClick", font=("Segoe UI", 16, "bold")
         ).pack(anchor="w")
-        
+
         ttk.Label(
-            header_frame, 
-            text="High-Precision Automation Tool", 
-            foreground="#666"
+            header_frame, text="High-Precision Automation Tool", foreground="#666"
         ).pack(anchor="w")
 
         # --- Configuration Panel ---
-        config_frame = ttk.LabelFrame(
-            self.root, 
-            text="Configuration", 
-            padding=(15, 10)
-        )
+        config_frame = ttk.LabelFrame(self.root, text="Configuration", padding=(15, 10))
         config_frame.pack(fill="x", padx=10, pady=5)
 
         # Coordinates Row
         coord_row = ttk.Frame(config_frame)
         coord_row.pack(fill="x", pady=2)
-        
+
         ttk.Label(coord_row, text="X:").grid(row=0, column=0, sticky="e", padx=(0, 5))
         self.entry_x = ttk.Entry(coord_row, width=10)
         self.entry_x.grid(row=0, column=1, sticky="w")
-        
+
         ttk.Label(coord_row, text="Y:").grid(row=0, column=2, sticky="e", padx=(10, 5))
         self.entry_y = ttk.Entry(coord_row, width=10)
         self.entry_y.grid(row=0, column=3, sticky="w")
-        
+
         btn_pos = ttk.Button(
-            coord_row, 
-            text="Capture Pos", 
-            command=self._capture_position, 
-            width=12
+            coord_row, text="Capture Pos", command=self._capture_position, width=12
         )
         btn_pos.grid(row=0, column=4, padx=(10, 0), sticky="e")
 
         # Timing Row
         time_row = ttk.Frame(config_frame)
         time_row.pack(fill="x", pady=5)
-        
+
         ttk.Label(time_row, text="Start Time (HH:MM:SS.ms):").grid(
             row=0, column=0, sticky="w"
         )
         self.entry_time = ttk.Entry(time_row, width=20)
-        
+
         # Default to current time + 5 seconds for convenience
         future_time = datetime.datetime.now() + datetime.timedelta(seconds=5)
-        default_time_str = future_time.strftime("%H:%M:%S.") + f"{future_time.microsecond // 1000:03d}"
+        default_time_str = (
+            future_time.strftime("%H:%M:%S.") + f"{future_time.microsecond // 1000:03d}"
+        )
         self.entry_time.insert(0, default_time_str)
         self.entry_time.grid(row=0, column=1, sticky="w", padx=(10, 0))
 
         # Counts Row
         count_row = ttk.Frame(config_frame)
         count_row.pack(fill="x", pady=5)
-        
+
         ttk.Label(count_row, text="Total Clicks:").grid(row=0, column=0, sticky="w")
         self.entry_clicks = ttk.Spinbox(count_row, from_=1, to=100000, width=10)
         self.entry_clicks.set(10)
@@ -141,63 +132,52 @@ class MainWindow:
         # --- Control Buttons ---
         ctrl_frame = ttk.Frame(self.root, padding=(10, 5))
         ctrl_frame.pack(fill="x")
-        
+
         self.btn_start = ttk.Button(
-            ctrl_frame, 
-            text="▶ Start (F9)", 
-            command=self._start_process
+            ctrl_frame, text="▶ Start (F9)", command=self._start_process
         )
         self.btn_start.pack(side="left", expand=True, fill="x", padx=(0, 5))
-        
+
         self.btn_stop = ttk.Button(
-            ctrl_frame, 
-            text="■ Stop (F10)", 
-            command=self._stop_process, 
-            state="disabled"
+            ctrl_frame,
+            text="■ Stop (F10)",
+            command=self._stop_process,
+            state="disabled",
         )
         self.btn_stop.pack(side="right", expand=True, fill="x", padx=(5, 0))
 
         # --- Activity Log Console ---
-        log_frame = ttk.LabelFrame(
-            self.root, 
-            text="Activity Log", 
-            padding=(5, 5)
-        )
+        log_frame = ttk.LabelFrame(self.root, text="Activity Log", padding=(5, 5))
         log_frame.pack(fill="both", expand=True, padx=10, pady=5)
-        
+
         self.text_log = tk.Text(
-            log_frame, 
-            height=15, 
-            wrap="word", 
-            bg="#ffffff", 
-            relief="sunken"
+            log_frame, height=15, wrap="word", bg="#ffffff", relief="sunken"
         )
         scrollbar = ttk.Scrollbar(
-            log_frame, 
-            orient="vertical", 
-            command=self.text_log.yview
+            log_frame, orient="vertical", command=self.text_log.yview
         )
         self.text_log.configure(yscrollcommand=scrollbar.set)
-        
+
         scrollbar.pack(side="right", fill="y")
         self.text_log.pack(side="left", fill="both", expand=True)
 
     def _bind_hotkeys(self) -> None:
         """Registers global keyboard shortcuts for quick control."""
-        self.root.bind('<F9>', lambda e: self._start_process())
-        self.root.bind('<F10>', lambda e: self._stop_process())
+        self.root.bind("<F9>", lambda e: self._start_process())
+        self.root.bind("<F10>", lambda e: self._stop_process())
 
     def _capture_position(self) -> None:
         """Updates X/Y entries with current mouse coordinates."""
         from pynput.mouse import Controller
+
         pos = Controller().position
-        
+
         self.entry_x.delete(0, tk.END)
         self.entry_x.insert(0, str(int(pos.x)))
-        
+
         self.entry_y.delete(0, tk.END)
         self.entry_y.insert(0, str(int(pos.y)))
-        
+
         self._log_info(f"Position captured: ({pos.x}, {pos.y})")
 
     def _log_info(self, message: str) -> None:
@@ -208,7 +188,7 @@ class MainWindow:
         """
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
         formatted_msg = f"[{timestamp}] INFO: {message}\n"
-        
+
         self.text_log.insert(tk.END, formatted_msg)
         self.text_log.see(tk.END)
 
@@ -216,10 +196,12 @@ class MainWindow:
         """Writes a timestamped success message to the log console."""
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
         formatted_msg = f"[{timestamp}] SUCCESS: {message}\n"
-        
+
         self.text_log.insert(tk.END, formatted_msg)
         # Simple tag coloring for visual distinction
-        self.text_log.tag_add("success_tag", f"{len(formatted_msg)-1}c-{len(formatted_msg)}c", "end")
+        self.text_log.tag_add(
+            "success_tag", f"{len(formatted_msg)-1}c-{len(formatted_msg)}c", "end"
+        )
         self.text_log.tag_config("success_tag", foreground="green")
         self.text_log.see(tk.END)
 
@@ -248,17 +230,17 @@ class MainWindow:
             clicks = int(self.entry_clicks.get())
             interval = float(self.entry_interval.get())
             start_time_str = self.entry_time.get()
-            
+
             self._log_info(
                 f"Starting Sequence... Target: {start_time_str}, "
                 f"Clicks: {clicks}, Interval: {interval}ms"
             )
-            
+
             self.btn_start.config(state="disabled")
             self.btn_stop.config(state="normal")
-            
+
             # Reset engine state
-            self.engine.stop() 
+            self.engine.stop()
             self.engine._stop_event.clear()
             self.engine._pause_event.clear()
             self.engine._is_active = True
@@ -267,7 +249,7 @@ class MainWindow:
             self.worker_thread = threading.Thread(
                 target=self.engine.execute_sequence,
                 args=(start_time_str, clicks, interval, x, y, self._on_click_event),
-                daemon=True
+                daemon=True,
             )
             self.worker_thread.start()
 

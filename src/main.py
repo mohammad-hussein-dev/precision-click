@@ -29,19 +29,19 @@ def center_window(root: tk.Tk) -> None:
     height = root.winfo_height()
     x = (root.winfo_screenwidth() // 2) - (width // 2)
     y = (root.winfo_screenheight() // 2) - (height // 2)
-    root.geometry(f'+{x}+{y}')
+    root.geometry(f"+{x}+{y}")
 
 
 def main() -> None:
     """Launches the PrecisionClick application."""
     root = tk.Tk()
-    
+
     # Initialize UI Controller
     app = MainWindow(root)
-    
+
     # Center window visually
     center_window(root)
-    
+
     # Start Main Loop
     root.mainloop()
 

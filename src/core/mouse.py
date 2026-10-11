@@ -17,7 +17,7 @@ Design Philosophy:
 Usage:
 ------
     from src.core.mouse import MouseDriver
-    
+
     driver = MouseDriver()
     driver.move_to(100, 200)
     driver.click_left()
@@ -64,11 +64,11 @@ class MouseDriver:
                               before releasing. Defaults to 10ms.
         """
         self._controller.press(Button.left)
-        
+
         if hold_duration_ms > 0:
             # Convert ms to seconds for time.sleep
             time.sleep(hold_duration_ms / 1000.0)
-            
+
         self._controller.release(Button.left)
 
     def get_position(self) -> Tuple[int, int]:
