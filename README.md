@@ -1,157 +1,420 @@
 # PrecisionClick ⚡
 
-> **High-Precision Desktop Automation Engine**  
-> A robust, modular Python utility for millisecond-accurate mouse automation. Designed with a strict Separation of Concerns (SoC), leveraging hybrid timing strategies to bypass OS scheduler limitations while maintaining minimal CPU footprint.
+> High-Precision Desktop Automation Engine — a modular Python system for millisecond-accurate mouse automation, built with SOLID principles, strict Separation of Concerns, thread-safe UI orchestration, and a hybrid Sleep/Spin timing strategy designed to bypass OS scheduler limitations.
 
-![PrecisionClick Interface](./assets/screenshot.png)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-0078D4?logo=windows&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-SOLID%20%7C%20SoC-00E5FF)
+![Timing](https://img.shields.io/badge/Timing-Hybrid%20Sleep%2FSpin-FF9F1C)
+![Type Safety](https://img.shields.io/badge/Code%20Quality-100%25%20Type%20Hints-4C1D95)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+[![Technical Report](https://img.shields.io/badge/Docs-Technical%20Architecture%20Report-EA4335?logo=adobeacrobatreader&logoColor=white)](https://raw.githubusercontent.com/mohammad-hussein-dev/precision-click/main/docs/PrecisionClick_Technical_Report.pdf)
+
+![PrecisionClick Screenshot](assets/screenshot.png)
 
 ---
 
-## 🏗 Architecture & Design Philosophy
+## Table of Contents
 
-This project adheres to **SOLID principles** and **Clean Code** standards, prioritizing maintainability and testability over quick hacks. The architecture decouples business logic from presentation, enabling headless testing and future extensibility.
+- [Overview](#overview)
+- [Technical Architecture Report](#technical-architecture-report)
+- [Engineering Value](#engineering-value)
+- [Architecture](#architecture)
+- [Hybrid Timing Strategy](#hybrid-timing-strategy)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Development Workflow](#development-workflow)
+- [Project Structure](#project-structure)
+- [Quality Gates](#quality-gates)
+- [Performance Overview](#performance-overview)
+- [Security & Trust](#security--trust)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
 
-### Core Components
+---
+
+## Overview
+
+**PrecisionClick** is not a simple auto-clicker. It is a production-minded desktop automation engine engineered to solve a real systems-level problem: achieving reliable millisecond-scale timing on general-purpose operating systems where `time.sleep()` is subject to scheduler granularity, context-switch latency, and non-deterministic wake-up behavior.
+
+The project demonstrates advanced Python engineering across multiple layers:
+
+- **Low-level input simulation** through a Hardware Abstraction Layer.
+- **Deterministic timing orchestration** using a hybrid coarse/fine scheduling model.
+- **Thread-safe GUI architecture** for Tkinter-based desktop applications.
+- **Typed, maintainable, testable codebase** aligned with Clean Code and SOLID principles.
+- **Reproducible CI/CD pipeline** for linting, testing, and Windows executable builds.
+- **Senior-level technical documentation** delivered as a dedicated PDF architecture report.
+
+This repository is suitable as a portfolio artifact for roles involving:
+
+- Backend / Desktop Python Engineering
+- Systems Programming Concepts
+- Automation / RPA Tooling
+- DevSecOps and CI/CD Practices
+- Software Architecture and Code Quality Leadership
+
+---
+
+## Technical Architecture Report
+
+A dedicated senior-level technical report has been prepared for this project.
+
+[📄 Download / Open Technical Architecture Report — PDF](https://raw.githubusercontent.com/mohammad-hussein-dev/precision-click/main/docs/PrecisionClick_Technical_Report.pdf)
+
+The report includes:
+
+- Executive summary
+- Problem statement and OS scheduler analysis
+- System architecture and layer responsibilities
+- Mathematical model of the hybrid timing strategy
+- Concurrency and thread-safety design
+- Hardware abstraction and input simulation decisions
+- Security considerations
+- Testing and validation methodology
+- Performance benchmarking
+- CI/CD deployment pipeline
+- MIT licensing and legal notice
+
+This document is intended to demonstrate engineering depth beyond implementation, showing architectural reasoning, trade-off analysis, and production-oriented documentation discipline.
+
+---
+
+## Engineering Value
+
+| Area | Implementation |
+|---|---|
+| **Architecture** | Strict Separation of Concerns across UI, Core Engine, and Hardware Abstraction Layer |
+| **Design Patterns** | Adapter, Strategy, State Machine, Observer / MVC-style callback dispatching |
+| **Timing Precision** | Hybrid Sleep/Spin strategy targeting ±1–3 ms practical deviation |
+| **Concurrency** | Background worker threads with `threading.Event`-based coordination |
+| **UI Safety** | Tkinter updates marshalled to the main thread using `root.after()` |
+| **Type Safety** | PEP 484 type hints across the codebase |
+| **Maintainability** | Google-style docstrings, modular package layout, explicit error boundaries |
+| **Build Pipeline** | GitHub Actions for linting and Windows PyInstaller artifact generation |
+| **Documentation** | Full Technical Architecture Report in PDF format |
+| **Licensing** | MIT License for maximum openness and reuse |
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    UI["UI Layer<br/>Tkinter Presentation"]
+    Core["Core Engine<br/>Timing & State Orchestration"]
+    HAL["Hardware Abstraction Layer<br/>pynput Mouse Controller"]
+    OS["OS Input API<br/>Win32 / X11"]
+
+    UI -->|Callbacks / Commands| Core
+    Core -->|Deterministic Input Commands| HAL
+    HAL -->|Synthetic Events| OS
+```
 
 | Module | Responsibility | Pattern |
-| :--- | :--- | :--- |
-| `src/core/mouse.py` | Hardware Abstraction Layer (HAL). Wraps `pynput` for deterministic input simulation. | Adapter |
-| `src/core/engine.py` | Business Logic. Orchestrates timing sequences using a hybrid Sleep/Spin-wait strategy. | Strategy / State Machine |
-| `src/ui/main_window.py` | Presentation Layer. Manages Tkinter widgets and thread-safe UI updates via callbacks. | MVC / Observer |
-| `src/main.py` | Entry Point. Initializes context and manages application lifecycle. | Facade |
-
-### The "Hybrid Timing" Advantage
-Standard `time.sleep()` in Windows/Linux has ~15ms granularity due to OS scheduler ticks. To achieve sub-millisecond precision without burning 100% CPU:
-1.  **Coarse Phase:** Uses `time.sleep()` for the bulk of the wait duration (CPU efficient).
-2.  **Fine Phase:** Switches to a tight **busy-wait loop** (`while datetime.now() < target`) for the final <2ms window (Maximum accuracy).
+|---|---|---|
+| `src/core/mouse.py` | Hardware Abstraction Layer wrapping `pynput` for deterministic mouse control | Adapter |
+| `src/core/engine.py` | Business logic, timing orchestration, state management, hybrid wait strategy | Strategy / State Machine |
+| `src/ui/main_window.py` | Tkinter presentation layer, user controls, telemetry log, thread-safe updates | MVC / Observer |
+| `src/main.py` | Application entry point and lifecycle bootstrap | Facade |
 
 ---
 
-## ✨ Key Features
+## Hybrid Timing Strategy
 
-- **Sub-Millisecond Accuracy:** Achieves ±1-3ms deviation through hybrid scheduling algorithms.
-- **Thread-Safe Execution:** Background worker threads prevent UI freezing during long sequences.
-- **Real-Time Telemetry:** Integrated console logs every action with microsecond timestamps for audit trails.
-- **Global Hotkeys:** Instant control via `F9` (Start/Pause) and `F10` (Stop/Reset).
-- **Portable Build:** Compiled into a single standalone `.exe` via PyInstaller (No runtime dependencies).
-- **Type-Safe Codebase:** 100% coverage with PEP 484 Type Hints and Google-style Docstrings.
+Standard `time.sleep()` on Windows/Linux is limited by OS scheduler granularity, often around 15 ms. Pure busy-waiting improves precision but consumes CPU unnecessarily.
+
+PrecisionClick uses a two-phase timing model:
+
+```python
+if remaining_ms > 2.0:
+    time.sleep(remaining_ms - buffer_ms)
+else:
+    while datetime.now() < target_time:
+        pass
+```
+
+### Phase 1 — Coarse Sleep
+
+Used when the remaining delay is relatively large.
+
+- Low CPU usage
+- Efficient for long waits
+- Reduces power consumption
+- Suitable for laptop and desktop environments
+
+### Phase 2 — Fine Spin-Wait
+
+Used inside the final precision window.
+
+- Bypasses scheduler wake-up latency
+- Maximizes timing accuracy
+- Keeps CPU impact bounded to the critical interval only
+
+This hybrid approach balances precision, efficiency, and practical desktop usability.
 
 ---
 
-## 🛠 Tech Stack
+## Key Features
 
-- **Language:** Python 3.11+
-- **GUI Framework:** Tkinter (Native, Lightweight, Zero-Bloat)
-- **Input Simulation:** Pynput (Cross-platform low-level API)
-- **Build Tool:** PyInstaller (Single-file executable generation)
-- **CI/CD:** GitHub Actions (Automated Windows Builds & Linting)
-- **Quality Assurance:** Ruff (Linting), Black (Formatting), MyPy (Static Analysis)
+- **Millisecond-oriented automation engine** for scheduled mouse interactions.
+- **Hybrid Sleep/Spin timing model** for improved precision with controlled CPU usage.
+- **Thread-safe Tkinter UI** with callback dispatching to the main event loop.
+- **Real-time telemetry logging** with timestamped execution records.
+- **Global hotkey support** for fast control:
+  - `F9` — Start / Pause
+  - `F10` — Stop / Reset
+- **Portable Windows executable** built with PyInstaller.
+- **Typed Python codebase** with PEP 484 annotations.
+- **Clean architecture** separating UI, core logic, and hardware abstraction.
+- **CI/CD automation** for linting and release artifact generation.
+- **MIT-licensed open-source project** suitable for portfolio and professional review.
 
 ---
 
-## 📦 Installation & Usage
+## Tech Stack
 
-### Option 1: End-User (Binary)
-Download the latest release from the [Releases Page](https://github.com/mohammad-hussein-dev/precision-click/releases).
+| Category | Technology |
+|---|---|
+| Language | Python 3.11+ |
+| GUI Framework | Tkinter |
+| Input Simulation | `pynput` |
+| Packaging | PyInstaller |
+| CI/CD | GitHub Actions |
+| Linting | Ruff |
+| Formatting | Black |
+| Static Analysis | MyPy |
+| Testing | pytest |
+| Documentation | LaTeX / PDF Technical Report |
+| License | MIT |
 
-1. Extract `PrecisionClick.exe`.
+---
+
+## Installation
+
+### Option 1 — End User Binary
+
+Download the latest Windows executable from the releases page:
+
+[📦 PrecisionClick Releases](https://github.com/mohammad-hussein-dev/precision-click/releases)
+
+1. Download `PrecisionClick.exe`.
 2. Run directly on Windows 10/11.
-3. *Note: If Windows Defender flags the unsigned binary, select "More info" → "Run anyway". This is standard behavior for self-contained PyInstaller executables.*
 
-### Option 2: Developer (Source)
-Clone and run locally for customization or contribution.
+> If Windows Defender SmartScreen flags the unsigned binary, choose **More info → Run anyway**. This is expected behavior for self-contained PyInstaller executables without digital signing.
+
+---
+
+### Option 2 — Developer Source Install
 
 ```bash
-# Clone repository
 git clone https://github.com/mohammad-hussein-dev/precision-click.git
 cd precision-click
 
-# Create isolated virtual environment
 python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows
+source .venv/bin/activate
 
-# Install dependencies in editable mode
 pip install -e ".[dev]"
+```
 
-# Launch application
+On Windows PowerShell:
+
+```powershell
+git clone https://github.com/mohammad-hussein-dev/precision-click.git
+cd precision-click
+
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+pip install -e ".[dev]"
+```
+
+---
+
+## Usage
+
+Launch the application:
+
+```bash
 python -m src.main
 ```
 
+Or run the packaged executable:
+
+```text
+dist/PrecisionClick.exe
+```
+
+### Hotkeys
+
+| Hotkey | Action |
+|---|---|
+| `F9` | Start / Pause automation sequence |
+| `F10` | Stop / Reset automation sequence |
+
+The UI provides:
+
+- Scheduled click configuration
+- Live telemetry log
+- Execution status feedback
+- Thread-safe controls for long-running sequences
+
 ---
 
-## 🧪 Development Workflow
+## Development Workflow
 
-We enforce strict code quality gates via pre-commit hooks and CI pipelines to ensure production readiness.
+Install development dependencies:
 
-### Running Tests & Linters
 ```bash
-# Static Analysis & Formatting
+pip install -e ".[dev]"
+```
+
+Run linting and formatting:
+
+```bash
 ruff check . --fix
 black .
+```
 
-# Type Checking
+Run static type checking:
+
+```bash
 mypy src/
+```
 
-# Unit Tests
+Run tests:
+
+```bash
 pytest tests/ -v --cov=src
 ```
 
-### Building Executable Locally
+Build executable locally:
+
 ```bash
 pyinstaller --onefile --windowed --name PrecisionClick src/main.py
-# Output located in ./dist/PrecisionClick.exe
+```
+
+Output:
+
+```text
+dist/PrecisionClick.exe
 ```
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 precision-click/
-├── .github/workflows/      # CI/CD Pipelines (Build & Lint)
-├── assets/                 # Screenshots & Media Resources
-├── docs/                   # Additional Technical Documentation
-├── src/                    # Source Code Root
-│   ├── core/               # Business Logic & HAL
-│   │   ├── engine.py       # Timing Orchestration
-│   │   └── mouse.py        # Input Simulation
-│   ├── ui/                 # Presentation Layer
-│   │   └── main_window.py  # Tkinter Controller
-│   └── main.py             # Application Entry Point
-├── tests/                  # Unit & Integration Tests
-├── pyproject.toml          # Modern Python Project Config (PEP 621)
+├── .github/workflows/      # CI/CD pipelines for linting and Windows builds
+├── assets/                 # Screenshots and media resources
+├── docs/                   # Technical documentation and PDF report
+│   └── PrecisionClick_Technical_Report.pdf
+├── src/                    # Source code root
+│   ├── core/               # Business logic and hardware abstraction
+│   │   ├── engine.py       # Timing orchestration
+│   │   └── mouse.py        # Input simulation adapter
+│   ├── ui/                 # Presentation layer
+│   │   └── main_window.py  # Tkinter controller
+│   └── main.py             # Application entry point
+├── tests/                  # Unit and integration tests
+├── pyproject.toml          # Modern Python project configuration
 ├── LICENSE                 # MIT License
-└── README.md               # Project Documentation
+└── README.md               # Project documentation
 ```
 
 ---
 
-## 🤝 Contributing
+## Quality Gates
 
-Contributions are welcome! Please follow these steps to maintain code integrity:
+This project follows a strict engineering quality workflow.
 
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feat/amazing-feature`).
-3. Commit changes following [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat: add new hotkey`).
-4. Push to the branch (`git push origin feat/amazing-feature`).
-5. Open a Pull Request.
-
-Ensure all checks pass in CI before requesting review.
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
+| Gate | Tool | Purpose |
+|---|---|---|
+| Linting | Ruff | Fast static analysis and style enforcement |
+| Formatting | Black | Consistent PEP 8-aligned formatting |
+| Type Checking | MyPy | Static verification of PEP 484 annotations |
+| Testing | pytest | Unit and integration validation |
+| Coverage | pytest-cov | Execution visibility for critical modules |
+| CI/CD | GitHub Actions | Automated quality and release build pipeline |
+| Documentation | LaTeX PDF Report | Architecture, security, testing, and licensing transparency |
 
 ---
 
-<div align="center">
+## Performance Overview
 
-**Developed by Mohammad Hussein Ghafoori**  
-*Senior Software Architect | DevSecOps Engineer*
+| Method | Avg Error | CPU Behavior | Practical Fit |
+|---|---:|---|---|
+| Naive `time.sleep()` | Higher jitter | Low CPU | Unsuitable for precision tasks |
+| Pure Spin-Wait | Very low error | High CPU | Precise but inefficient |
+| **Hybrid Sleep/Spin** | **Low error** | **Controlled CPU** | **Best balance for desktop automation** |
 
-[🌐 Portfolio](https://mohammad-hussein-dev.github.io/mohammad-hussein-dev/) • [💼 LinkedIn](https://www.linkedin.com/in/mohammad-hussein-dev/) • [🐙 GitHub](https://github.com/mohammad-hussein-dev) • [🦊 GitLab](https://gitlab.com/mohammad-hussein-dev) • [📧 Email](mailto:mohammad.hussein.dev.1@gmail.com)
+The hybrid model is designed for real desktop environments where both timing reliability and resource efficiency matter.
 
-</div>
+---
+
+## Security & Trust
+
+PrecisionClick is engineered as a local desktop utility with transparent behavior.
+
+Security-oriented design principles:
+
+- **No hidden network dependency** for core automation functionality.
+- **Open-source implementation** for auditability.
+- **MIT License** for transparent reuse.
+- **Explicit user-initiated execution** through UI controls and hotkeys.
+- **Thread-safe state management** using standard Python synchronization primitives.
+- **No obfuscation** in the distributed source or build process.
+
+For production distribution, additional hardening can include:
+
+- Code-signed Windows binaries.
+- SBOM generation.
+- Automated dependency vulnerability scanning.
+- Reproducible build attestations.
+
+---
+
+## Contributing
+
+Contributions are welcome. Please follow the existing engineering standards.
+
+```bash
+git checkout -b feat/your-feature-name
+```
+
+Guidelines:
+
+- Use Conventional Commits.
+- Keep type hints complete.
+- Maintain Google-style docstrings.
+- Run `ruff`, `black`, `mypy`, and `pytest` before opening a PR.
+- Update documentation when architecture or behavior changes.
+
+Example commit message:
+
+```text
+feat: add configurable click hold duration
+```
+
+---
+
+## License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+
+---
+
+## Author
+
+**Mohammad Hussein Ghafoori**  
+Senior Software Architect | DevSecOps Engineer | Python Backend Engineer
+
+[🌐 Portfolio](https://mohammad-hussein-dev.github.io/mohammad-hussein-dev/)  
+[💼 LinkedIn](https://www.linkedin.com/in/mohammad-hussein-dev/)  
+[🐙 GitHub](https://github.com/mohammad-hussein-dev)  
+[🦊 GitLab](https://gitlab.com/mohammad-hussein-dev)  
+[📧 Email](mailto:mohammad.hussein.dev.1@gmail.com)
